@@ -36,8 +36,6 @@ class GradleOneJarPlugin implements Plugin<Project> {
     private GradleOneJarPluginExtension oneJar
     private File oneJarBuildDir
 
-    // TODO error out gracefully if missing mainClass
-
     // TODO comment all the things
     // TODO push to mavenCentral()
     // TODO test task lifecycle for sub-projects
@@ -54,7 +52,9 @@ class GradleOneJarPlugin implements Plugin<Project> {
 
             inputs.files([project.tasks.jar.outputs.files, project.configurations.getByName("compile"), project.configurations.getByName("runtime")])
             doFirst {
-
+                if (!oneJar.mainClass) {
+                    throw new IllegalStateException("The mainClass must be set in order to create a One-JAR archive.")
+                }
                 unpackOneJarBoot()
                 buildOneJarMain()
                 buildOneJarLib()
