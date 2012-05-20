@@ -52,17 +52,13 @@ class GradleOneJarPlugin implements Plugin<Project> {
         project.task('oneJar', dependsOn: [project.tasks.jar]) {
             description = "Create a One-JAR runnable archive from the current project."
 
-            // TODO fix broken final name, pull version from somewhere useful
-            def jar = project.tasks.jar
-            File finalJarFile = new File(jar.destinationDir, jar.baseName + "-standalone." + jar.extension)
-
-            inputs.files([jar.outputs.files, project.configurations.getByName("compile"), project.configurations.getByName("runtime")])
-            outputs.files finalJarFile
+            inputs.files([project.tasks.jar.outputs.files, project.configurations.getByName("compile"), project.configurations.getByName("runtime")])
             doFirst {
+
                 unpackOneJarBoot()
                 buildOneJarMain()
                 buildOneJarLib()
-                buildOneJar(finalJarFile)
+                buildOneJar()
 
                 // TODO one-jar artifact attachment
             }
@@ -107,6 +103,7 @@ class GradleOneJarPlugin implements Plugin<Project> {
 
         // create /main/main.jar
         def originalJar = project.tasks.jar.archivePath
+        project.logger.info(originalJar.toString())
         def mainFile = new File(mainDir.absolutePath, "main.jar")
         project.ant.copy(file: originalJar, tofile: mainFile.absolutePath)
     }
@@ -133,12 +130,14 @@ class GradleOneJarPlugin implements Plugin<Project> {
 
     /**
      * Output the final One-JAR archive to the given file.
-     *
-     * @param finalJarFile
      */
-    private void buildOneJar(File finalJarFile) {
+    private void buildOneJar() {
 
         def manifestFile = writeOneJarManifestFile()
+
+        // hack to ensure we get "-standalone.jar" tacked on to archiveName + a valid version
+        def jar = project.tasks.jar
+        File finalJarFile = new File(jar.destinationDir, jar.archiveName - ("." + jar.extension) + "-standalone." + jar.extension)
         project.ant.jar(destfile: finalJarFile,
                         basedir: oneJarBuildDir.absolutePath,
                         manifest: manifestFile.absolutePath)
