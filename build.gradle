@@ -1,0 +1,84 @@
+import org.gradle.api.artifacts.maven.MavenDeployment
+
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'signing'
+apply plugin: 'idea'
+
+group = 'com.github.rholder'
+version = '0.0.1-SNAPSHOT'
+ext.packaging = 'jar'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile gradleApi()
+    groovy localGroovy()
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+//********* artifact signing *********
+if(gradle.startParameter.taskNames.contains("uploadArchives")) {
+    signing {
+        sign configurations.archives
+    }
+} else {
+    task signArchives {
+        // do nothing
+    }
+}
+
+uploadArchives {
+    repositories {
+        if (version.contains("SNAPSHOT")) {
+            mavenLocal()
+        } else {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+    
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                  authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+    
+                pom.project {
+                   name 'gradle-one-jar'
+                   packaging 'jar'
+                   description 'The gradle-one-jar project is a Gradle plugin that uses One-JAR, a specialized Class-Loader written by Simon Tuffs (http://one-jar.sourceforge.net/), for building self-contained executable jars that include all dependencies.'
+                   url 'http://rholder.github.com'
+    
+                   scm {
+                       url 'scm:git@github.com:rholder/gradle-one-jar.git'
+                       connection 'scm:git@github.com:rholder/gradle-one-jar.git'
+                       developerConnection 'scm:git@github.com:rholder/gradle-one-jar.git'
+                   }
+    
+                   licenses {
+                       license {
+                           name 'The Apache Software License, Version 2.0'
+                           url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                           distribution 'repo'
+                       }
+                   }
+    
+                   developers {
+                       developer {
+                           id 'rholder'
+                           name 'Ray Holder'
+                       }
+                   }
+               }
+            }
+        }
+    }
+}
