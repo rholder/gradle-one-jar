@@ -1,7 +1,13 @@
 package com.github.rholder.gradle;
 
-import org.gradle.api.*
-import org.gradle.api.tasks.*
+
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.java.archives.Manifest
+import org.gradle.api.java.archives.internal.DefaultManifest
+import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.logging.Logger
 
 /**
  * This plugin rolls up your current project's jar and all of its dependencies
@@ -19,7 +25,7 @@ import org.gradle.api.tasks.*
  * |  lib/a.jar ...etc.
  * </pre>
  *
- * At a minimum, the configuration expects find a custom 'mainClass' when
+ * At a minimum, the configuration expects to find a custom 'mainClass' when
  * adding the plugin to your own builds, as in:
  *
  * <pre>
@@ -32,9 +38,10 @@ import org.gradle.api.tasks.*
  */
 class GradleOneJarPlugin implements Plugin<Project> {
 
-    private Project project
     private GradleOneJarPluginExtension oneJar
     private File oneJarBuildDir
+    private Logger logger
+    private AntBuilder ant
 
     // TODO comment all the things
     // TODO push to mavenCentral()
@@ -43,7 +50,8 @@ class GradleOneJarPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply(plugin:'java')
 
-        this.project = project
+        this.logger = project.logger
+        this.ant = project.ant
         this.oneJar = project.extensions.create("oneJar", GradleOneJarPluginExtension)
         this.oneJarBuildDir = new File(project.buildDir, "one-jar-build")
 
@@ -56,9 +64,9 @@ class GradleOneJarPlugin implements Plugin<Project> {
                     throw new IllegalStateException("The mainClass must be set in order to create a One-JAR archive.")
                 }
                 unpackOneJarBoot()
-                buildOneJarMain()
-                buildOneJarLib()
-                buildOneJar()
+                buildOneJarMain(project.tasks.jar)
+                buildOneJarLib(project)
+                buildOneJar(project.tasks.jar)
 
                 // TODO one-jar artifact attachment
             }
@@ -84,34 +92,33 @@ class GradleOneJarPlugin implements Plugin<Project> {
         // TODO add ability to set your own custom one-jar-boot jar
         def oneJarBootFilename = oneJar.useStable ? "one-jar-boot-0.97.jar" : "one-jar-boot-0.98.jar"
         outputResourceFromClasspath(oneJarBootFilename, oneJarBootFile)
-        project.ant.unzip(
+        ant.unzip(
                 src: oneJarBootFile.absolutePath,
                 dest: oneJarBuildDir.absolutePath,
                 failOnEmptyArchive: true,
         ) {
-            project.ant.patternset(excludes: 'src/**, boot-manifest.mf')
+            ant.patternset(excludes: 'src/**, boot-manifest.mf')
         }
     }
 
     /**
      * Build main/main.jar from the current project's jar.
      */
-    void buildOneJarMain() {
+    void buildOneJarMain(Jar jar) {
         // create /main/
         def mainDir = new File(oneJarBuildDir, "main")
         mainDir.mkdirs()
 
         // create /main/main.jar
-        def originalJar = project.tasks.jar.archivePath
-        project.logger.info(originalJar.toString())
+        def originalJar = jar.archivePath
         def mainFile = new File(mainDir.absolutePath, "main.jar")
-        project.ant.copy(file: originalJar, tofile: mainFile.absolutePath)
+        ant.copy(file: originalJar, tofile: mainFile.absolutePath)
     }
 
     /**
      * Build /lib/* from the current project's runtime and compile dependencies
      */
-    void buildOneJarLib() {
+    void buildOneJarLib(Project project) {
         // create /lib/
         def libDir = new File(oneJarBuildDir, "lib")
         libDir.mkdirs()
@@ -123,24 +130,32 @@ class GradleOneJarPlugin implements Plugin<Project> {
         ].flatten().unique()
 
         dependencies.findAll { !it.isDirectory() }.each { dep ->
-            project.logger.info("Adding ${dep.absolutePath} to One-JAR lib")
-            project.ant.copy(file: dep.absolutePath, todir: libDir.absolutePath)
+            logger.info("Adding ${dep.absolutePath} to One-JAR lib")
+            ant.copy(file: dep.absolutePath, todir: libDir.absolutePath)
         }
     }
 
     /**
      * Output the final One-JAR archive to the given file.
      */
-    private void buildOneJar() {
+    private void buildOneJar(Jar jar) {
 
-        def manifestFile = writeOneJarManifestFile()
+        // NOTE: if using your own custom manifest, you're responsible for adding entries for One-JAR boot
+        File manifestFile
+        if(oneJar.manifestFile) {
+            logger.info("Using custom manifest file: " + oneJar.manifestFile.absolutePath)
+            manifestFile = oneJar.manifestFile
+        } else {
+            // merge from Jar or create new empty manifest
+            Manifest manifest = oneJar.mergeManifestFromJar ? jar.manifest.effectiveManifest : new DefaultManifest(null)
+            manifestFile = writeOneJarManifestFile(manifest)
+        }
 
         // hack to ensure we get "-standalone.jar" tacked on to archiveName + a valid version
-        def jar = project.tasks.jar
         File finalJarFile = new File(jar.destinationDir, jar.archiveName - ("." + jar.extension) + "-standalone." + jar.extension)
-        project.ant.jar(destfile: finalJarFile,
-                        basedir: oneJarBuildDir.absolutePath,
-                        manifest: manifestFile.absolutePath)
+        ant.jar(destfile: finalJarFile,
+                basedir: oneJarBuildDir.absolutePath,
+                manifest: manifestFile.absolutePath)
     }
 
     /**
@@ -149,13 +164,11 @@ class GradleOneJarPlugin implements Plugin<Project> {
      *
      * @return
      */
-    private File writeOneJarManifestFile() {
-        def manifestFile = File.createTempFile("one-jar-manifest", "mf")
+    private File writeOneJarManifestFile(Manifest manifest) {
+        File manifestFile = File.createTempFile("one-jar-manifest", "mf")
         manifestFile.deleteOnExit()
 
         manifestFile.withWriter { writer ->
-            // TODO add config for custom manifest file
-            def manifest = project.tasks.jar.manifest.effectiveManifest
             manifest.attributes.put("Main-Class", "com.simontuffs.onejar.Boot")
             manifest.attributes.put("One-Jar-Main-Class", oneJar.mainClass)
             manifest.attributes.put("One-Jar-Show-Expand", oneJar.oneJarShowExpand)
