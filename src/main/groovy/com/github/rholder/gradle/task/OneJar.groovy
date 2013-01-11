@@ -6,6 +6,7 @@ import org.gradle.api.java.archives.internal.DefaultManifest
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.artifacts.PublishArtifact
+import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
 
 class OneJar extends Jar {
 
@@ -68,16 +69,9 @@ class OneJar extends Jar {
             logger.info("Building One-JAR: " + finalJarFile.absolutePath)
             Date date = new Date()
             String name = baseJar.baseName
-            project.artifacts.add('archives',
-                    [
-                            getClassifier: { -> classifier },
-                            getDate: {-> date },
-                            getExtension: {-> "jar" },
-                            getType: {-> "jar" },
-                            getFile: {-> finalJarFile },
-                            getName: {-> name }
-                    ] as PublishArtifact
-            )
+
+            PublishArtifact publishArtifact = new DefaultPublishArtifact(name, 'jar', 'jar', classifier, date, finalJarFile, this)
+            project.artifacts.add('archives', publishArtifact)
         }
     }
 
