@@ -1,12 +1,28 @@
+/*
+ * Copyright 2013 Ray Holder
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.github.rholder.gradle.task
 
 import com.github.rholder.gradle.util.Files
-import org.gradle.api.java.archives.Manifest
-import org.gradle.api.java.archives.internal.DefaultManifest
-import org.gradle.api.logging.Logger
-import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.PublishArtifact
 import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
+import org.gradle.api.java.archives.Manifest
+import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.bundling.Jar
 
 class OneJar extends Jar {
 
@@ -15,15 +31,16 @@ class OneJar extends Jar {
     AntBuilder ant
 
     boolean useStable = true
-    boolean showExpand = false
-    boolean confirmExpand = false
     boolean mergeManifestFromJar = false
 
-    String classifier = 'standalone'
+    // TODO expose One-Jar-Expand functionality
+    boolean showExpand = false
+    boolean confirmExpand = false
 
     String mainClass
     File manifestFile
     Jar baseJar
+    Configuration targetConfiguration
 
     OneJar() {
 
@@ -38,10 +55,21 @@ class OneJar extends Jar {
         if(!baseJar) {
             baseJar = project.tasks.jar
         }
+
+        // use runtime configuration if none is specified
+        if(!targetConfiguration) {
+            targetConfiguration = project.configurations.runtime
+        }
+
+        // set standalone as classifier if unspecified
+        if(!classifier || classifier.isEmpty()) {
+            classifier = 'standalone'
+        }
+
         dependsOn = [baseJar]
 
         inputs.files([baseJar.getArchivePath().absoluteFile])
-        outputs.files([new File(baseJar.getArchivePath().parentFile.absolutePath, generateFilename(baseJar, classifier))])
+        outputs.files([new File(baseJar.getArchivePath().parentFile.absolutePath, generateFilename(baseJar, getClassifier()))])
 
         doFirst {
             if (!mainClass) {
@@ -56,9 +84,8 @@ class OneJar extends Jar {
             new AntBuilder().copy(file: baseJar.archivePath.absolutePath,
                     toFile: new File(oneJarBuildDir, 'main/main.jar'))
 
-            // TODO allow other configurations to be passed in
             // copy /lib/* from the current project's runtime dependencies
-            def libs = project.configurations.runtime.resolve()
+            def libs = targetConfiguration.resolve()
             logger.info("Including dependencies: " + libs)
             libs.each {
                 new AntBuilder().copy(file: it,
@@ -70,7 +97,7 @@ class OneJar extends Jar {
             Date date = new Date()
             String name = baseJar.baseName
 
-            PublishArtifact publishArtifact = new DefaultPublishArtifact(name, 'jar', 'jar', classifier, date, finalJarFile, this)
+            PublishArtifact publishArtifact = new DefaultPublishArtifact(name, 'jar', 'jar', getClassifier(), date, finalJarFile, this)
             project.artifacts.add('archives', publishArtifact)
         }
     }
@@ -118,13 +145,12 @@ class OneJar extends Jar {
             targetManifestFile = manifestFile
         } else {
             // merge from Jar or create new empty manifest
-            Manifest manifest = mergeManifestFromJar ? jar.manifest.effectiveManifest : new DefaultManifest(null)
+            Manifest manifest = mergeManifestFromJar ? jar.manifest.effectiveManifest : this.manifest
             targetManifestFile = writeOneJarManifestFile(manifest)
         }
 
 
-        File finalJarFile = new File(jar.destinationDir, generateFilename(jar, classifier))
-        //File finalJarFile = new File(jar.archivePath.parentFile.absolutePath, 'one-jar.jar')
+        File finalJarFile = new File(jar.destinationDir, generateFilename(jar, getClassifier()))
         ant.jar(destfile: finalJarFile,
                 basedir: oneJarBuildDir.absolutePath,
                 manifest: targetManifestFile.absolutePath)
@@ -144,7 +170,6 @@ class OneJar extends Jar {
             manifest.attributes.put("One-Jar-Main-Class", mainClass)
             manifest.attributes.put("One-Jar-Show-Expand", showExpand)
             manifest.attributes.put("One-Jar-Confirm-Expand", confirmExpand)
-            manifest.attributes.put("Created-By", "Gradle OneJar Task")
             manifest.writeTo(writer)
         }
         return manifestFile
