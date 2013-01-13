@@ -62,7 +62,6 @@ import com.github.rholder.gradle.task.OneJar
  */
 class GradleOneJarPlugin implements Plugin<Project> {
 
-    // TODO push to mavenCentral()
     // TODO test task lifecycle for sub-projects
     // TODO integrate external test project
     void apply(Project project) {
