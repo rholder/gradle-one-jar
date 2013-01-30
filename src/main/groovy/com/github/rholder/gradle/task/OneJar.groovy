@@ -69,7 +69,7 @@ class OneJar extends Jar {
         dependsOn = [baseJar]
 
         inputs.files([baseJar.getArchivePath().absoluteFile])
-        outputs.files([new File(baseJar.getArchivePath().parentFile.absolutePath, generateFilename(baseJar, getClassifier()))])
+        outputs.file(new File(baseJar.getArchivePath().parentFile.absolutePath, generateFilename(baseJar, getClassifier())))
 
         doFirst {
             if (!mainClass) {
@@ -93,12 +93,7 @@ class OneJar extends Jar {
             }
 
             File finalJarFile = buildOneJar(baseJar)
-            logger.info("Building One-JAR: " + finalJarFile.absolutePath)
-            Date date = new Date()
-            String name = baseJar.baseName
-
-            PublishArtifact publishArtifact = new DefaultPublishArtifact(name, 'jar', 'jar', getClassifier(), date, finalJarFile, this)
-            project.artifacts.add('archives', publishArtifact)
+            logger.info("Built One-JAR: " + finalJarFile.absolutePath)
         }
     }
 
