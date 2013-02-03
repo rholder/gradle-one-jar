@@ -51,8 +51,12 @@ Then you can run the task with:
 
     gradle awesomeFunJar
 
-The end result will be a new build artifact with the 'standalone' classifier
-that should be suitable for publishing to a repository, etc.
+The end result will be a new build artifact with the `standalone` classifier
+that should be suitable for publishing to a repository, etc. via:
+
+    artifacts {
+        archives awesomeFunJar
+    }
 
 ##Advanced Features
 The current incarnation of the `gradle-one-jar` plugin exists as a highly
