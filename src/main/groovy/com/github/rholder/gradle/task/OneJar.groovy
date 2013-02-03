@@ -18,8 +18,6 @@ package com.github.rholder.gradle.task
 
 import com.github.rholder.gradle.util.Files
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.PublishArtifact
-import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
 import org.gradle.api.java.archives.Manifest
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.bundling.Jar
