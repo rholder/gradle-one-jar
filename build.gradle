@@ -6,7 +6,7 @@ apply plugin: 'signing'
 apply plugin: 'idea'
 
 group = 'com.github.rholder'
-version = '1.0.1-SNAPSHOT'
+version = '1.0.1'
 ext.packaging = 'jar'
 
 repositories {
