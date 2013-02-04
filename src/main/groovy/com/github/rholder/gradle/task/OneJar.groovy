@@ -114,7 +114,7 @@ class OneJar extends Jar {
         logger.info("Extacting temporary boot file: " + oneJarBootFile.absolutePath)
 
         // TODO add ability to set your own custom one-jar-boot jar
-        def oneJarBootFilename = useStable ? "one-jar-boot-0.97.jar" : "one-jar-boot-0.98.jar"
+        def oneJarBootFilename = useStable ? "one-jar-boot-0.97.1.jar" : "one-jar-boot-0.98.jar"
         Files.outputResourceFromClasspath(oneJarBootFilename, oneJarBootFile)
 
         ant.unzip(
