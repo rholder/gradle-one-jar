@@ -45,7 +45,7 @@ class OneJar extends Jar {
         logger = project.logger
         ant = project.ant
         oneJarBuildDir = new File(project.buildDir, "one-jar-build")
-        logger.info("Created " + oneJarBuildDir.absolutePath)
+        logger.debug("Created " + oneJarBuildDir.absolutePath)
 
         description = "Create a One-JAR runnable archive from the current project using a given main Class."
 
@@ -84,14 +84,14 @@ class OneJar extends Jar {
 
             // copy /lib/* from the current project's runtime dependencies
             def libs = targetConfiguration.resolve()
-            logger.info("Including dependencies: " + libs)
+            logger.debug("Including dependencies: " + libs)
             libs.each {
                 new AntBuilder().copy(file: it,
                         todir: new File(oneJarBuildDir.absolutePath, "lib"))
             }
 
             File finalJarFile = buildOneJar(baseJar)
-            logger.info("Built One-JAR: " + finalJarFile.absolutePath)
+            logger.debug("Built One-JAR: " + finalJarFile.absolutePath)
         }
     }
 
@@ -111,7 +111,7 @@ class OneJar extends Jar {
         // pull one-jar-boot out of the classpath to this file
         def oneJarBootFile = File.createTempFile("one-jar-boot", ".jar")
         oneJarBootFile.deleteOnExit()
-        logger.info("Extacting temporary boot file: " + oneJarBootFile.absolutePath)
+        logger.debug("Extacting temporary boot file: " + oneJarBootFile.absolutePath)
 
         // TODO add ability to set your own custom one-jar-boot jar
         def oneJarBootFilename = useStable ? "one-jar-boot-0.97.1.jar" : "one-jar-boot-0.98.jar"
@@ -134,7 +134,7 @@ class OneJar extends Jar {
         // NOTE: if using your own custom manifest, you're responsible for adding entries for One-JAR boot
         File targetManifestFile
         if(manifestFile) {
-            logger.info("Using custom manifest file: " + manifestFile.absolutePath)
+            logger.debug("Using custom manifest file: " + manifestFile.absolutePath)
             targetManifestFile = manifestFile
         } else {
             // merge from Jar or create new empty manifest
