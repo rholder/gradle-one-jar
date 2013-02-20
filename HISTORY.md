@@ -1,3 +1,7 @@
+##1.0.2 - 2013-02-20
+* Add binLib and additionalDir functionality, similar to binlib and fileset tags in the One-JAR Ant task (rholder, issue #5)
+* Update one-jar-boot 0.97 to version 0.97.1 (joschi, issue #4)
+
 ##1.0.1 - 2013-02-02
 * Bump Gradle wrapper 1.3 to 1.4 (joschi)
 * Fix to remove automatic artifact publishing (joschi, issue #3)
