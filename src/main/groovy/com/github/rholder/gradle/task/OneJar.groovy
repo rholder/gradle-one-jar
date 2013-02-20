@@ -21,6 +21,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.java.archives.Manifest
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.file.FileCollection
 
 class OneJar extends Jar {
 
@@ -39,6 +40,8 @@ class OneJar extends Jar {
     File manifestFile
     Jar baseJar
     Configuration targetConfiguration
+    FileCollection binLib
+    File additionalDir
 
     OneJar() {
 
@@ -84,10 +87,28 @@ class OneJar extends Jar {
 
             // copy /lib/* from the current project's runtime dependencies
             def libs = targetConfiguration.resolve()
-            logger.debug("Including dependencies: " + libs)
             libs.each {
+                logger.debug("Including dependency: " + it.absolutePath)
                 new AntBuilder().copy(file: it,
                         todir: new File(oneJarBuildDir.absolutePath, "lib"))
+            }
+
+            // flatten everything specified in binLib to /binlib/*
+            if(binLib) {
+                binLib.each {
+                    new AntBuilder().copy(file: it,
+                            todir: new File(oneJarBuildDir.absolutePath, "binlib"))
+                }
+            }
+
+            // copy everything from this dir over the top of the final archive
+            if(additionalDir) {
+                if(additionalDir.isDirectory()) {
+                    logger.debug("Adding all additional files found in: " + additionalDir.absolutePath)
+                    new AntBuilder().copy(todir: oneJarBuildDir.absolutePath) {
+                        fileset(dir: additionalDir.absolutePath)
+                    }
+                }
             }
 
             File finalJarFile = buildOneJar(baseJar)
