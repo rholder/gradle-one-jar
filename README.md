@@ -146,6 +146,27 @@ the entries that are expected by `one-jar-boot` yourself:
     One-Jar-Confirm-Expand: false
     Created-By: rholder
 
+###Add native libraries
+Files added to the `/binlib` directory within an archive get expanded to a
+temporary directory on startup, and the One-JAR JarClassLoader loads them
+automatically. To get your own native library files included in your archive,
+try something like this:
+
+    task awesomeFunJar(type: OneJar) {
+        mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
+        binLib = files('libFoo.so')
+    }
+
+###Add any files to the root archive
+If you just want to be able to drop arbitrary files into the root of the
+generated archive, then you can specify a directory (which will also include its
+children) to be copied over the top of the the existing files with:
+
+    task awesomeFunJar(type: OneJar) {
+        mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
+        additionalDir = file('someDirFilledWithGoodies')
+    }
+
 ###Override the base Jar task
 By default, the current project's `Jar` task (which is made available when
 applying the `java` plugin and exposed as `jar`) is where a `OneJar` task pulls
