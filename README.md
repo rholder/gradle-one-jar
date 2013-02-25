@@ -76,6 +76,17 @@ if you'd prefer to use the latest development version `one-jar-boot-0.98.jar`
         useStable = false
     }
 
+You can also use your own One-Jar jar by using the oneJarConfiguration setting.
+    configurations { oneJarLib }
+    dependencies { oneJarLib DEPENDENCY_SPEC_WITH_A_SINGLE_JAR_FOR_ONE-JAR-BOOT.JAR }
+
+    task awesomeFunJar(type: OneJar) {
+        mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
+        useStable = false
+        onejarConfiguration = configurations.oneJarLib
+    }
+
+
 ###Use custom configuration for dependencies
 By default, the plugin uses the current project's `runtime` configuration to
 resolve which dependencies are to be included in the final One-JAR archive. If
