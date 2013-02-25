@@ -40,6 +40,7 @@ class OneJar extends Jar {
     File manifestFile
     Jar baseJar
     Configuration targetConfiguration
+    Configuration onejarConfiguration
     FileCollection binLib
     File additionalDir
 
@@ -134,9 +135,19 @@ class OneJar extends Jar {
         oneJarBootFile.deleteOnExit()
         logger.debug("Extacting temporary boot file: " + oneJarBootFile.absolutePath)
 
-        // TODO add ability to set your own custom one-jar-boot jar
-        def oneJarBootFilename = useStable ? "one-jar-boot-0.97.1.jar" : "one-jar-boot-0.98.jar"
-        Files.outputResourceFromClasspath(oneJarBootFilename, oneJarBootFile)
+        if (onejarConfiguration && onejarConfiguration.dependencies.size() == 1){
+            def oneJarFile = onejarConfiguration.singleFile
+            logger.debug("using one-jar from dependency :${oneJarFile}")
+
+            oneJarBootFile.withOutputStream { output ->
+                oneJarFile.withInputStream { input ->
+                    output << input
+                }
+            }
+        }else {
+            def oneJarBootFilename = useStable ? "one-jar-boot-0.97.1.jar" : "one-jar-boot-0.98.jar"
+            Files.outputResourceFromClasspath(oneJarBootFilename, oneJarBootFile)
+        }
 
         ant.unzip(
                 src: oneJarBootFile.absolutePath,
