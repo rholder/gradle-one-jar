@@ -67,25 +67,35 @@ standardized artifacts.
 
 ###Selectable One-JAR version
 By default, the `one-jar-boot` version used is the stable
-`one-jar-boot-0.97.jar` which is available from the One-JAR homepage. However,
-if you'd prefer to use the latest development version `one-jar-boot-0.98.jar`
-(last updated 2010-08-25) then you can do so with the following:
+`one-jar-boot-0.97.jar` which is available from the One-JAR homepage (last
+updated 2012-08-15). However, if you'd prefer to use the latest development
+version `one-jar-boot-0.98.jar` (last updated 2010-08-25) then you can do so
+with the following:
 
     task awesomeFunJar(type: OneJar) {
         mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
         useStable = false
     }
 
-You can also use your own One-Jar jar by using the oneJarConfiguration setting.
-    configurations { oneJarLib }
-    dependencies { oneJarLib DEPENDENCY_SPEC_WITH_A_SINGLE_JAR_FOR_ONE-JAR-BOOT.JAR }
+###Bring your own One-JAR version
+You can also use your own customized version of a `one-jar-boot` jar by using
+the oneJarConfiguration setting, as in the following that assumes your root
+project directory contains the jar at
+`custom-boot/one-jar-boot-0.97.2-custom.jar`:
+
+    configurations {
+        oneJarLib
+    }
+
+    dependencies {
+        oneJarLib files('custom-boot/one-jar-boot-0.97.2-custom.jar')
+    }
 
     task awesomeFunJar(type: OneJar) {
         mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
         useStable = false
-        onejarConfiguration = configurations.oneJarLib
+        oneJarConfiguration = configurations.oneJarLib
     }
-
 
 ###Use custom configuration for dependencies
 By default, the plugin uses the current project's `runtime` configuration to
