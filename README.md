@@ -36,7 +36,7 @@ First, you'll want to add the plugin to your build, as in:
             mavenCentral()
         }
         dependencies {
-            classpath 'com.github.rholder:gradle-one-jar:1.0.2'
+            classpath 'com.github.rholder:gradle-one-jar:1.0.3'
         }
     }
 
