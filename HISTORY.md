@@ -1,3 +1,6 @@
+##1.0.3 - 2013-02-28
+* Support for custom one-jar-boot.jar via Gradle dependency (squiddle)
+
 ##1.0.2 - 2013-02-20
 * Add binLib and additionalDir functionality, similar to binlib and fileset tags in the One-JAR Ant task (rholder, issue #5)
 * Update one-jar-boot 0.97 to version 0.97.1 (joschi, issue #4)
