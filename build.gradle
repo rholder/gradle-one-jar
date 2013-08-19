@@ -6,7 +6,7 @@ apply plugin: 'signing'
 apply plugin: 'idea'
 
 group = 'com.github.rholder'
-version = '1.0.3'
+version = '1.0.4-SNAPSHOT'
 ext.packaging = 'jar'
 
 sourceCompatibility = 1.6
@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     compile gradleApi()
-    groovy localGroovy()
+    compile localGroovy()
 }
 
 task sourcesJar(type: Jar) {
@@ -38,7 +38,7 @@ task exportJavadoc(type: Copy, dependsOn: 'groovydoc') {
 
 // enable Gradle Wrapper support for bootstrapping with specific version
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.4'
+    gradleVersion = '1.6'
 }
 
 artifacts {
