@@ -188,6 +188,22 @@ children) to be copied over the top of the the existing files with:
         additionalDir = file('someDirFilledWithGoodies')
     }
 
+###Framework ClassLoader customizations
+[Spring](http://www.springsource.org/), [Guice](https://code.google.com/p/google-guice/),
+and even [JavaFX](http://docs.oracle.com/javafx/)'s [FXML](http://docs.oracle.com/javafx/2/api/javafx/fxml/doc-files/introduction_to_fxml.html)
+make certain assumptions about class loading that may not hold when bundling
+projects in a One-JAR archive. The workaround for these cases is documented
+[here](http://one-jar.sourceforge.net/index.php?page=frameworks). In order to
+enable this functionality in the plugin, you can simply add one of the included
+factories to the manifest, as in:
+
+    task awesomeFunJar(type: OneJar) {
+        mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
+        manifest {
+            attributes 'One-Jar-URL-Factory': 'com.simontuffs.onejar.JarClassLoader$OneJarURLFactory'
+        }
+    }
+
 ###Override the base Jar task
 By default, the current project's `Jar` task (which is made available when
 applying the `java` plugin and exposed as `jar`) is where a `OneJar` task pulls
