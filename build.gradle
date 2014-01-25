@@ -38,7 +38,7 @@ task exportJavadoc(type: Copy, dependsOn: 'groovydoc') {
 
 // enable Gradle Wrapper support for bootstrapping with specific version
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.6'
+    gradleVersion = '1.10'
 }
 
 artifacts {
