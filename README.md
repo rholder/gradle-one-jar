@@ -31,6 +31,7 @@ You can read more about the layout of a One-JAR archive from the official site
 ##Quick Start
 First, you'll want to add the plugin to your build, as in:
 ```groovy
+
 apply plugin: 'gradle-one-jar'
 
 buildscript {
@@ -93,6 +94,7 @@ You can also use your own customized version of a `one-jar-boot` jar by using
 the oneJarConfiguration setting, as in the following that assumes your root
 project directory contains the jar at
 `custom-boot/one-jar-boot-0.97.2-custom.jar`:
+
 ```groovy
 configurations {
     oneJarLib
