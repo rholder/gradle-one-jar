@@ -27,7 +27,6 @@ class OneJar extends Jar {
 
     File oneJarBuildDir
     Logger logger
-    AntBuilder ant
 
     boolean useStable = true
     boolean mergeManifestFromJar = false
@@ -47,7 +46,6 @@ class OneJar extends Jar {
     OneJar() {
 
         logger = project.logger
-        ant = project.ant
         oneJarBuildDir = new File(project.buildDir, "one-jar-build")
         logger.debug("Created " + oneJarBuildDir.absolutePath)
 
@@ -83,21 +81,21 @@ class OneJar extends Jar {
             unpackOneJarBoot(oneJarBuildDir.absolutePath)
 
             // create main/main.jar from the current project's jar
-            new AntBuilder().copy(file: baseJar.archivePath.absolutePath,
+            ant.copy(file: baseJar.archivePath.absolutePath,
                     toFile: new File(oneJarBuildDir, 'main/main.jar'))
 
             // copy /lib/* from the current project's runtime dependencies
             def libs = targetConfiguration.resolve()
             libs.each {
                 logger.debug("Including dependency: " + it.absolutePath)
-                new AntBuilder().copy(file: it,
+                ant.copy(file: it,
                         todir: new File(oneJarBuildDir.absolutePath, "lib"))
             }
 
             // flatten everything specified in binLib to /binlib/*
             if(binLib) {
                 binLib.each {
-                    new AntBuilder().copy(file: it,
+                    ant.copy(file: it,
                             todir: new File(oneJarBuildDir.absolutePath, "binlib"))
                 }
             }
@@ -106,7 +104,7 @@ class OneJar extends Jar {
             if(additionalDir) {
                 if(additionalDir.isDirectory()) {
                     logger.debug("Adding all additional files found in: " + additionalDir.absolutePath)
-                    new AntBuilder().copy(todir: oneJarBuildDir.absolutePath) {
+                    ant.copy(todir: oneJarBuildDir.absolutePath) {
                         fileset(dir: additionalDir.absolutePath)
                     }
                 }
