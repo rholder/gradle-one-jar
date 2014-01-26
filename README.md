@@ -285,3 +285,5 @@ this plugin does automatically.
 ##Contributors
 * Jochen Schalanda (joschi)
 * Christian S. (squiddle)
+* Ben Manes (ben-manes)
+* Adam Walczak (walec51)
