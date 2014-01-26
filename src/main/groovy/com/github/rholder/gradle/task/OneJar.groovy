@@ -69,7 +69,7 @@ class OneJar extends Jar {
         dependsOn = [baseJar]
 
         inputs.files([baseJar.getArchivePath().absoluteFile])
-        outputs.file(new File(baseJar.getArchivePath().parentFile.absolutePath, generateFilename(baseJar, getClassifier())))
+        outputs.file(new File(baseJar.getArchivePath().parentFile.absolutePath, getArchiveName()))
 
         doFirst {
             if (!mainClass) {
@@ -113,14 +113,6 @@ class OneJar extends Jar {
             File finalJarFile = buildOneJar(baseJar)
             logger.debug("Built One-JAR: " + finalJarFile.absolutePath)
         }
-    }
-
-    /**
-     * This is kind of a hack to ensure we get "-classifier.jar" tacked on to
-     * archiveName + a valid version.
-     */
-    static String generateFilename(Jar jar, String classifier) {
-        return jar.archiveName - ("." + jar.extension) + "-" + classifier + "." + jar.extension
     }
 
     /**
@@ -172,8 +164,7 @@ class OneJar extends Jar {
             targetManifestFile = writeOneJarManifestFile(manifest)
         }
 
-
-        File finalJarFile = new File(jar.destinationDir, generateFilename(jar, getClassifier()))
+        File finalJarFile = new File(jar.destinationDir, getArchiveName())
         ant.jar(destfile: finalJarFile,
                 basedir: oneJarBuildDir.absolutePath,
                 manifest: targetManifestFile.absolutePath)
