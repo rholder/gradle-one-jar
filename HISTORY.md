@@ -1,3 +1,9 @@
+##1.0.4 - 2014-01-25
+* Bump Gradle wrapper up to 1.10
+* Add notes about ClassLoader support to README.md (ben-manes, walec51, issue #11)
+* Possible fix for dependent subproject rebuilding (issue #12)
+* Add ability to change final artifact name to align with builtin Jar task (issue #14)
+
 ##1.0.3 - 2013-02-28
 * Support for custom one-jar-boot.jar via Gradle dependency (squiddle)
 
