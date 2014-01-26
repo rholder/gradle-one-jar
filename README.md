@@ -68,6 +68,15 @@ artifacts {
 }
 ```
 
+If you don't like the name of the final artifact, you can change it just like
+any other Gradle `Jar` task with:
+```groovy
+task awesomeFunJar(type: OneJar) {
+    mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
+    archiveName = 'koala.jar'
+}
+```
+
 ##Advanced Features
 The current incarnation of the `gradle-one-jar` plugin exists as a highly
 configurable Gradle task implementation built as an extension of the built-in
