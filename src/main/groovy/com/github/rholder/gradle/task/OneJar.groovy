@@ -41,6 +41,7 @@ class OneJar extends Jar {
     Configuration targetConfiguration
     Configuration oneJarConfiguration
     FileCollection binLib
+    File binDir
     File additionalDir
 
     OneJar() {
@@ -97,6 +98,14 @@ class OneJar extends Jar {
                 binLib.each {
                     ant.copy(file: it,
                             todir: new File(oneJarBuildDir.absolutePath, "binlib"))
+                }
+            }
+
+            // copy binDir including sub-folders
+            if(binDir && binDir.isDirectory()) {
+                logger.debug("Adding all additional binary files found in: " + binDir.absolutePath)
+                ant.copy(todir: new File(oneJarBuildDir.absolutePath, "binlib")) {
+                    fileset(dir: binDir.absolutePath)
                 }
             }
 
