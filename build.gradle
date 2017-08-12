@@ -5,8 +5,8 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
 
-group = 'com.github.rholder'
-version = '1.0.4'
+group = 'com.github.onslip'
+version = '1.0.5'
 ext.packaging = 'jar'
 
 sourceCompatibility = 1.6
@@ -65,23 +65,23 @@ uploadArchives {
         } else {
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-    
+
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                   authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
-    
+
                 pom.project {
                    name 'gradle-one-jar'
                    packaging 'jar'
                    description 'The gradle-one-jar project is a Gradle plugin that uses One-JAR, a specialized Class-Loader written by Simon Tuffs (http://one-jar.sourceforge.net/), for building self-contained executable jars that include all dependencies.'
-                   url 'http://rholder.github.com'
-    
+                   url 'https://github.com/Onslip/'
+
                    scm {
-                       url 'scm:git@github.com:rholder/gradle-one-jar.git'
-                       connection 'scm:git@github.com:rholder/gradle-one-jar.git'
-                       developerConnection 'scm:git@github.com:rholder/gradle-one-jar.git'
+                       url 'scm:git@github.com:Onslip/gradle-one-jar.git'
+                       connection 'scm:git@github.com:Onslip/gradle-one-jar.git'
+                       developerConnection 'scm:git@github.com:Onslip/gradle-one-jar.git'
                    }
-    
+
                    licenses {
                        license {
                            name 'The Apache Software License, Version 2.0'
@@ -89,11 +89,17 @@ uploadArchives {
                            distribution 'repo'
                        }
                    }
-    
+
                    developers {
                        developer {
                            id 'rholder'
                            name 'Ray Holder'
+                       }
+                       developer {
+                            name 'Martin Blom'
+                            email 'martin.blom@onslip.com'
+                            organization 'Onslip AB'
+                            organizationUrl 'http://www.onslip.com/'
                        }
                    }
                }

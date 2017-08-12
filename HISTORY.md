@@ -1,3 +1,11 @@
+##1.0.5 - 2017-08-12
+* This is an Onslip fork.
+* Added binDir property to include a file hierarchy in binlib. This is required
+  when having JNI modules for multiple systems and architectures.
+* Applied PR rholder/gradle-one-jar#32: Stop using deprecated
+  Manifest.writeTo(Writer) and using Manifest.writeTo(Object) instead (alisiikh,
+  PR #1)
+
 ##1.0.4 - 2014-01-25
 * Bump Gradle wrapper up to 1.10
 * Add notes about ClassLoader support to README.md (ben-manes, walec51, issue #11)
