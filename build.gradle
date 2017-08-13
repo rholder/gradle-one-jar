@@ -1,19 +1,39 @@
 import org.gradle.api.artifacts.maven.MavenDeployment
 
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
+  }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
+apply plugin: "com.gradle.plugin-publish"
 
 group = 'com.github.onslip'
 version = '1.0.5'
 ext.packaging = 'jar'
+
+def pluginName = 'gradle-one-jar'
+def pluginDesc = 'The gradle-one-jar project is a Gradle plugin that uses One-JAR, a specialized Class-Loader written by Simon Tuffs (http://one-jar.sourceforge.net/), for building self-contained executable jars that include all dependencies.'
+def pluginHome = 'https://github.com/Onslip/gradle-one-jar/'
+def pluginRepo = 'https://github.com/Onslip/gradle-one-jar.git'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 repositories {
     mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
 }
 
 dependencies {
@@ -48,7 +68,7 @@ artifacts {
 }
 
 //********* artifact signing *********
-if(gradle.startParameter.taskNames.contains("uploadArchives")) {
+if(gradle.startParameter.taskNames.contains("uploadArchives") || gradle.startParameter.taskNames.contains("publishPlugins")) {
     signing {
         sign configurations.archives
     }
@@ -56,6 +76,20 @@ if(gradle.startParameter.taskNames.contains("uploadArchives")) {
     task signArchives {
         // do nothing
     }
+}
+
+pluginBundle {
+  website = pluginHome
+  vcsUrl = pluginRepo
+  description = pluginDesc
+  tags = [pluginName, 'one-jar']
+
+  plugins {
+    greetingsPlugin {
+      id = group + '.' + pluginName
+      displayName = pluginName
+    }
+  }
 }
 
 uploadArchives {
@@ -71,15 +105,15 @@ uploadArchives {
                 }
 
                 pom.project {
-                   name 'gradle-one-jar'
+                   name pluginName
                    packaging 'jar'
-                   description 'The gradle-one-jar project is a Gradle plugin that uses One-JAR, a specialized Class-Loader written by Simon Tuffs (http://one-jar.sourceforge.net/), for building self-contained executable jars that include all dependencies.'
-                   url 'https://github.com/Onslip/'
+                   description pluginDesc
+                   url pluginHome
 
                    scm {
-                       url 'scm:git@github.com:Onslip/gradle-one-jar.git'
-                       connection 'scm:git@github.com:Onslip/gradle-one-jar.git'
-                       developerConnection 'scm:git@github.com:Onslip/gradle-one-jar.git'
+                       url 'scm:git:' + pluginRepo
+                       connection 'scm:git:' + pluginRepo
+                       developerConnection 'scm:git:' + pluginRepo
                    }
 
                    licenses {
