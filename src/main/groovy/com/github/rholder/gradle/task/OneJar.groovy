@@ -70,7 +70,6 @@ class OneJar extends Jar {
         dependsOn = [baseJar]
 
         inputs.files([baseJar.getArchivePath().absoluteFile])
-        outputs.file(new File(baseJar.getArchivePath().parentFile.absolutePath, getArchiveName()))
 
         doFirst {
             if (!mainClass) {
