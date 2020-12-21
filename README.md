@@ -86,6 +86,15 @@ task awesomeFunJar(type: OneJar) {
 }
 ```
 
+You can also set `noClassifier = true` to avoid having a classifier added to
+the jar name, without specifying the archiveName
+```groovy
+task awesomeFunJar(type: OneJar) {
+    mainClass = 'com.github.rholder.awesome.MyAwesomeMain'
+    noClassifier = true
+}
+```
+
 ## Advanced Features
 The current incarnation of the `gradle-one-jar` plugin exists as a highly
 configurable Gradle task implementation built as an extension of the built-in

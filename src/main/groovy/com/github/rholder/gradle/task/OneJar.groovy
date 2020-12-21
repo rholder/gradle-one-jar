@@ -35,6 +35,8 @@ class OneJar extends Jar {
     boolean showExpand = false
     boolean confirmExpand = false
 
+    boolean noClassifier = false;
+
     String mainClass
     File manifestFile
     Jar baseJar
@@ -63,7 +65,7 @@ class OneJar extends Jar {
         }
 
         // set standalone as classifier if unspecified
-        if(!classifier || classifier.isEmpty()) {
+        if(!noClassifier && (!classifier || classifier.isEmpty())) {
             classifier = 'standalone'
         }
 
