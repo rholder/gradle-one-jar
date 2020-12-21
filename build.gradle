@@ -18,7 +18,7 @@ apply plugin: 'idea'
 apply plugin: "com.gradle.plugin-publish"
 
 group = 'com.github.onslip'
-version = '1.0.5'
+version = '1.0.6'
 ext.packaging = 'jar'
 
 def pluginName = 'gradle-one-jar'
