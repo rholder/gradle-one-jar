@@ -1,21 +1,13 @@
 import org.gradle.api.artifacts.maven.MavenDeployment
 
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
-  }
+plugins {
+  id "com.gradle.plugin-publish" version "0.12.0"
 }
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
-apply plugin: "com.gradle.plugin-publish"
 
 group = 'com.github.onslip'
 version = '1.0.6'
