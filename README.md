@@ -131,7 +131,7 @@ task awesomeFunJar(type: OneJar) {
 
 ### Use custom configuration for dependencies
 
-By default, the plugin uses the current project's `runtime` configuration to
+By default, the plugin uses the current project's `runtimeClasspath` configuration to
 resolve which dependencies are to be included in the final One-JAR archive. If
 you would rather use your own custom configuration, you can set it as follows in
 the task:

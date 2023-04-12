@@ -1,3 +1,8 @@
+## 1.1.0 - 2023-04-12
+
+* This is (still) an Onslip fork, and no longer published to Maven.
+* Fixed issue #9 to make it work with Gradle versions 6–8.
+
 ## 1.0.6 - 2020-12-21
 
 * This is (still) an Onslip fork.

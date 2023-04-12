@@ -20,36 +20,36 @@ import com.github.rholder.gradle.util.Files
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.java.archives.Manifest
 import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.file.FileCollection
 
 class OneJar extends Jar {
 
-    File oneJarBuildDir
-    Logger logger
+    @Internal File oneJarBuildDir
+    @Internal Logger logger
 
-    boolean useStable = true
-    boolean mergeManifestFromJar = false
+    @Input boolean useStable = true
+    @Input boolean mergeManifestFromJar = false
 
     // TODO expose One-Jar-Expand functionality
-    boolean showExpand = false
-    boolean confirmExpand = false
+    @Input boolean showExpand = false
+    @Input boolean confirmExpand = false
 
-    boolean noClassifier = false;
+    @Input boolean noClassifier = false;
 
-    String mainClass
-    File manifestFile
-    Jar baseJar
-    Configuration targetConfiguration
-    Configuration oneJarConfiguration
-    FileCollection binLib
-    File binDir
-    File additionalDir
+    @Input String mainClass
+    @Optional @InputFile File manifestFile
+    @Optional @InputFiles Jar baseJar
+    @Optional @InputFiles Configuration targetConfiguration
+    @Optional @InputFiles Configuration oneJarConfiguration
+    @Optional @InputFiles FileCollection binLib
+    @Optional @InputDirectory File binDir
+    @Optional @InputDirectory File additionalDir
 
     OneJar() {
-
         logger = project.logger
-        oneJarBuildDir = new File(project.buildDir, "one-jar-build")
+        oneJarBuildDir = new File(new File(project.buildDir, "one-jar-build"), name)
         logger.debug("Created " + oneJarBuildDir.absolutePath)
 
         description = "Create a One-JAR runnable archive from the current project using a given main Class."
@@ -59,19 +59,10 @@ class OneJar extends Jar {
             baseJar = project.tasks.jar
         }
 
-        // use runtime configuration if none is specified
+        // use runtimeClasspath configuration if none is specified
         if(!targetConfiguration) {
-            targetConfiguration = project.configurations.runtime
+            targetConfiguration = project.configurations.runtimeClasspath
         }
-
-        // set standalone as classifier if unspecified
-        if(!noClassifier && (!classifier || classifier.isEmpty())) {
-            classifier = 'standalone'
-        }
-
-        dependsOn = [baseJar]
-
-        inputs.files([baseJar.getArchivePath().absoluteFile])
 
         doFirst {
             if (!mainClass) {
@@ -79,11 +70,15 @@ class OneJar extends Jar {
             }
             oneJarBuildDir.mkdirs()
 
+            // set standalone as classifier if unspecified
+            if (!noClassifier && (!archiveClassifier.isPresent() || archiveClassifier.get().isEmpty())) {
+                archiveClassifier.set('standalone')
+            }
             // unpack OneJar root layout to build dir
             unpackOneJarBoot(oneJarBuildDir.absolutePath)
 
             // create main/main.jar from the current project's jar
-            ant.copy(file: baseJar.archivePath.absolutePath,
+            ant.copy(file: baseJar.archiveFile.get(),
                     toFile: new File(oneJarBuildDir, 'main/main.jar'))
 
             // copy /lib/* from the current project's runtime dependencies
@@ -174,7 +169,7 @@ class OneJar extends Jar {
             targetManifestFile = writeOneJarManifestFile(manifest)
         }
 
-        File finalJarFile = new File(jar.destinationDir, getArchiveName())
+        File finalJarFile = new File(jar.destinationDirectory.getAsFile().get(), getArchiveFileName().get())
         ant.jar(destfile: finalJarFile,
                 basedir: oneJarBuildDir.absolutePath,
                 manifest: targetManifestFile.absolutePath)
@@ -188,7 +183,7 @@ class OneJar extends Jar {
     File writeOneJarManifestFile(Manifest manifest) {
         File manifestFile = File.createTempFile("one-jar-manifest", ".mf")
         manifestFile.deleteOnExit()
-        
+
         manifest.attributes.put("Main-Class", "com.simontuffs.onejar.Boot")
         manifest.attributes.put("One-Jar-Main-Class", mainClass)
         manifest.attributes.put("One-Jar-Show-Expand", showExpand)
