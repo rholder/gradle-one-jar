@@ -1,44 +1,48 @@
-import org.gradle.api.artifacts.maven.MavenDeployment
+plugins {
+  id "com.gradle.plugin-publish" version "0.12.0"
+}
 
 apply plugin: 'groovy'
-apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
 
-group = 'com.github.rholder'
-version = '1.0.4'
+group = 'com.github.onslip'
+version = '1.1.0'
 ext.packaging = 'jar'
+
+def pluginName = 'gradle-one-jar'
+def pluginDesc = 'The gradle-one-jar project is a Gradle plugin that uses One-JAR, a specialized Class-Loader written by Simon Tuffs (http://one-jar.sourceforge.net/), for building self-contained executable jars that include all dependencies.'
+def pluginHome = 'https://github.com/Onslip/gradle-one-jar/'
+def pluginRepo = 'https://github.com/Onslip/gradle-one-jar.git'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 repositories {
     mavenCentral()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+    implementation gradleApi()
+    implementation localGroovy()
 }
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 task groovydocJar(type: Jar, dependsOn: 'groovydoc') {
     from groovydoc.destinationDir
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
 }
 
 task exportJavadoc(type: Copy, dependsOn: 'groovydoc') {
     from groovydoc.destinationDir
     into 'javadoc'
-}
-
-// enable Gradle Wrapper support for bootstrapping with specific version
-task wrapper(type: Wrapper) {
-    gradleVersion = '1.10'
 }
 
 artifacts {
@@ -48,7 +52,7 @@ artifacts {
 }
 
 //********* artifact signing *********
-if(gradle.startParameter.taskNames.contains("uploadArchives")) {
+if(gradle.startParameter.taskNames.contains("publishPlugins")) {
     signing {
         sign configurations.archives
     }
@@ -58,46 +62,16 @@ if(gradle.startParameter.taskNames.contains("uploadArchives")) {
     }
 }
 
-uploadArchives {
-    repositories {
-        if (version.contains("SNAPSHOT")) {
-            mavenLocal()
-        } else {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-    
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                  authentication(userName: sonatypeUsername, password: sonatypePassword)
-                }
-    
-                pom.project {
-                   name 'gradle-one-jar'
-                   packaging 'jar'
-                   description 'The gradle-one-jar project is a Gradle plugin that uses One-JAR, a specialized Class-Loader written by Simon Tuffs (http://one-jar.sourceforge.net/), for building self-contained executable jars that include all dependencies.'
-                   url 'http://rholder.github.com'
-    
-                   scm {
-                       url 'scm:git@github.com:rholder/gradle-one-jar.git'
-                       connection 'scm:git@github.com:rholder/gradle-one-jar.git'
-                       developerConnection 'scm:git@github.com:rholder/gradle-one-jar.git'
-                   }
-    
-                   licenses {
-                       license {
-                           name 'The Apache Software License, Version 2.0'
-                           url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                           distribution 'repo'
-                       }
-                   }
-    
-                   developers {
-                       developer {
-                           id 'rholder'
-                           name 'Ray Holder'
-                       }
-                   }
-               }
-            }
-        }
+pluginBundle {
+  website = pluginHome
+  vcsUrl = pluginRepo
+  description = pluginDesc
+  tags = [pluginName, 'one-jar']
+
+  plugins {
+    greetingsPlugin {
+      id = group + '.' + pluginName
+      displayName = pluginName
     }
+  }
 }
