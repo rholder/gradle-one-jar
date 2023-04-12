@@ -26,7 +26,6 @@ I `~/.gradle/gradle.properties` ska man ha:
 ```sh
 gradle.publish.key=...
 gradle.publish.secret=...
-sonatypeUsername=lcs
 signing.keyId=9C541F6C
 signing.secretKeyRingFile=/Users/mb/.gnupg/secring.gpg
 ```
@@ -42,29 +41,13 @@ uid           [förbehållslös] Martin Blom <martin.blom@onslip.com>
 sub   rsa4096 2012-01-26 [E]
 ```
 
-### Maven
-
-Skicka upp filerna.
-
-```sh
-read -s PASSWORD
-read -s KEY
-./gradlew uploadArchives -PsonatypePassword=$PASSWORD -Psigning.password=$KEY
-```
-
-Logga sedan in på [Nexus Repository Manager](https://oss.sonatype.org/#stagingRepositories), hitta repot, välj *Close*
-och sen *Release*. Förr eller senare kommer det då att dyka upp på [Maven Central](https://search.maven.org/artifact/com.github.onslip/gradle-one-jar).
-
-Se [How to publish your open source library to Maven central](https://medium.com/@scottyab/how-to-publish-your-open-source-library-to-maven-central-5178d9579c5)
-för mer info.
-
 ## Gradle Plugins
 
 Kör
 
 ```sh
 read -s KEY
-gradle publishPlugins -PsonatypePassword= -Psigning.password=$KEY
+gradle publishPlugins -Psigning.password=$KEY
 ```
 
 så dyker den direkt upp på [Gradle - Plugin: com.github.onslip.gradle-one-jar](https://plugins.gradle.org/plugin/com.github.onslip.gradle-one-jar).

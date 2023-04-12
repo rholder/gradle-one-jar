@@ -35,23 +35,7 @@ First, you'll want to add the plugin to your build, as in:
 
 ```groovy
 plugins {
-    id "com.github.onslip.gradle-one-jar" version "1.0.6"
-}
-```
-
-or
-
-```groovy
-
-apply plugin: 'gradle-one-jar'
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.github.onslip:gradle-one-jar:1.0.6'
-    }
+    id "com.github.onslip.gradle-one-jar" version "1.1.0"
 }
 ```
 

@@ -1,16 +1,13 @@
-import org.gradle.api.artifacts.maven.MavenDeployment
-
 plugins {
   id "com.gradle.plugin-publish" version "0.12.0"
 }
 
 apply plugin: 'groovy'
-apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'idea'
 
 group = 'com.github.onslip'
-version = '1.0.6'
+version = '1.1.0'
 ext.packaging = 'jar'
 
 def pluginName = 'gradle-one-jar'
@@ -55,7 +52,7 @@ artifacts {
 }
 
 //********* artifact signing *********
-if(gradle.startParameter.taskNames.contains("uploadArchives") || gradle.startParameter.taskNames.contains("publishPlugins")) {
+if(gradle.startParameter.taskNames.contains("publishPlugins")) {
     signing {
         sign configurations.archives
     }
@@ -77,54 +74,4 @@ pluginBundle {
       displayName = pluginName
     }
   }
-}
-
-uploadArchives {
-    repositories {
-        if (version.contains("SNAPSHOT")) {
-            mavenLocal()
-        } else {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                  authentication(userName: sonatypeUsername, password: sonatypePassword)
-                }
-
-                pom.project {
-                   name pluginName
-                   packaging 'jar'
-                   description pluginDesc
-                   url pluginHome
-
-                   scm {
-                       url 'scm:git:' + pluginRepo
-                       connection 'scm:git:' + pluginRepo
-                       developerConnection 'scm:git:' + pluginRepo
-                   }
-
-                   licenses {
-                       license {
-                           name 'The Apache Software License, Version 2.0'
-                           url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                           distribution 'repo'
-                       }
-                   }
-
-                   developers {
-                       developer {
-                           id 'rholder'
-                           name 'Ray Holder'
-                       }
-                       developer {
-                            name 'Martin Blom'
-                            email 'martin.blom@onslip.com'
-                            organization 'Onslip AB'
-                            organizationUrl 'http://www.onslip.com/'
-                       }
-                   }
-               }
-            }
-        }
-    }
 }
